@@ -1,0 +1,12 @@
+#!/bin/bash
+echo "updateall v.1.2 for Ubuntu"
+#Run this as a normal user. Your admin password will be asked for if required.
+sudo apt update
+sudo apt upgrade -y
+sudo apt full-upgrade -y
+sudo apt-get clean -y
+sudo apt-get autoclean -y
+sudo apt-get autoremove -y
+#comment the following out in systems older than 16.04
+sudo purge-old-kernels -y
+echo "The script has now finished running."
