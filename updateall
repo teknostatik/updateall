@@ -1,12 +1,38 @@
 #!/bin/bash
-echo "updateall v.1.2 for Ubuntu"
+echo "--------------------------"
+echo "updateall v.2.0 for Ubuntu"
+echo "--------------------------"
+
 #Run this as a normal user. Your admin password will be asked for if required.
+
+# Standard error mitigation
+
+set -euo pipefail
+
+# The first bit is the standard apt stuff
+
 sudo apt update
 sudo apt upgrade -y
 sudo apt full-upgrade -y
-sudo apt-get clean -y
-sudo apt-get autoclean -y
-sudo apt-get autoremove -y
-#comment the following out in systems older than 16.04
+sudo apt autoremove -y
+
+# This will get rid of any old kernels. It requires Byobu to be installed.
+
 sudo purge-old-kernels -y
+
+# Uncommment if using Proton VPN command line
+
+sudo pip3 install protonvpn-cli --upgrade
+
+# Uncomment if you care about snaps being bang up to date
+
+sudo snap refresh
+
+# These commands are specific to any computer set up using my mp.sh script
+# They will start, update and then stop the containers created as part of that script
+# If you keep the containers running all the time then comment out the relevant lines
+
+multipass start ubuntu-lts
+multipass exec ubuntu-lts updateall
+multipass stop ubuntu-lts
 echo "The script has now finished running."
