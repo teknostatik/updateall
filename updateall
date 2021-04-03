@@ -28,7 +28,7 @@ sudo pip3 install protonvpn-cli --upgrade
 
 sudo snap refresh
 
-# These commands are specific to any computer set up using my mp.sh script
+# These commands are specific to any computer set up using any of my deployment scripts
 # They will start, update and then stop the containers created as part of that script
 # If you keep the containers running all the time then comment out the relevant lines
 
