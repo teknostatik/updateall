@@ -20,10 +20,6 @@ sudo apt autoremove -y
 
 sudo purge-old-kernels -y
 
-# Uncommment if using Proton VPN command line
-
-sudo pip3 install protonvpn-cli --upgrade
-
 # Uncomment if you care about snaps being bang up to date
 
 sudo snap refresh
