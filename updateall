@@ -22,13 +22,13 @@ sudo purge-old-kernels -y
 
 # Uncomment if you care about snaps being bang up to date
 
-sudo snap refresh
+# sudo snap refresh
 
 # These commands are specific to any computer set up using any of my deployment scripts
 # They will start, update and then stop the containers created as part of that script
 # If you keep the containers running all the time then comment out the relevant lines
 
-multipass start ubuntu-lts
-multipass exec ubuntu-lts updateall
-multipass stop ubuntu-lts
+# multipass start ubuntu-lts
+# multipass exec ubuntu-lts updateall
+# multipass stop ubuntu-lts
 echo "The script has now finished running."
