@@ -31,4 +31,5 @@ sudo purge-old-kernels -y
 # multipass start ubuntu-lts
 # multipass exec ubuntu-lts updateall
 # multipass stop ubuntu-lts
+
 echo "The script has now finished running."
