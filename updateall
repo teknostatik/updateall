@@ -32,4 +32,6 @@ sudo purge-old-kernels -y
 # multipass exec ubuntu-lts updateall
 # multipass stop ubuntu-lts
 
+# Uncomment to get a list of outdated process so you can decide whether to reboot. Requires needrestart to be installed
+
 echo "The script has now finished running."
