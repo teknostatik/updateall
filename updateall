@@ -11,10 +11,10 @@ set -euo pipefail
 
 # The first bit is the standard apt stuff
 
-sudo apt update
-sudo apt upgrade -y
-sudo apt full-upgrade -y
-sudo apt autoremove -y
+sudo apt-get update
+sudo apt-get upgrade -y
+sudo apt-get full-upgrade -y
+sudo apt-get autoremove -y
 
 # This will get rid of any old kernels. It requires Byobu to be installed.
 
@@ -33,5 +33,7 @@ sudo purge-old-kernels -y
 # multipass stop ubuntu-lts
 
 # Uncomment to get a list of outdated process so you can decide whether to reboot. Requires needrestart to be installed
+
+# needrestart
 
 echo "The script has now finished running."
