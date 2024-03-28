@@ -24,6 +24,10 @@ sudo purge-old-kernels -y
 
 # sudo snap refresh
 
+# Uncomment if you are using Flatpaks and you want them to be updated by this script
+
+flatpak update -y
+
 # These commands are specific to any computer set up using any of my deployment scripts
 # They will start, update and then stop the containers created as part of that script
 # If you keep the containers running all the time then comment out the relevant lines
@@ -34,6 +38,6 @@ sudo purge-old-kernels -y
 
 # Uncomment to get a list of outdated process so you can decide whether to reboot. Requires needrestart to be installed
 
-# needrestart
+needrestart
 
 echo "The script has now finished running."
