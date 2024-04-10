@@ -26,7 +26,7 @@ sudo purge-old-kernels -y
 
 # Uncomment if you are using Flatpaks and you want them to be updated by this script
 
-flatpak update -y
+# flatpak update -y
 
 # These commands are specific to any computer set up using any of my deployment scripts
 # They will start, update and then stop the containers created as part of that script
@@ -35,9 +35,5 @@ flatpak update -y
 # multipass start ubuntu-lts
 # multipass exec ubuntu-lts updateall
 # multipass stop ubuntu-lts
-
-# Uncomment to get a list of outdated process so you can decide whether to reboot. Requires needrestart to be installed
-
-needrestart
 
 echo "The script has now finished running."
