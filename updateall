@@ -26,7 +26,7 @@ sudo purge-old-kernels -y
 
 # Uncomment if you are using Flatpaks and you want them to be updated by this script
 
-flatpak update -y
+# flatpak update -y
 
 # These commands are specific to any computer set up using any of my deployment scripts
 # They will start, update and then stop the containers created as part of that script
