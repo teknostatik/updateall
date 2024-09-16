@@ -1,6 +1,6 @@
 #!/bin/bash
 echo "-----------------------------------"
-echo "updateall for Debian & Ubuntu"
+echo "updateall v.2.0 for Debian & Ubuntu"
 echo "-----------------------------------"
 
 #Run this as a normal user. Your admin password will be asked for if required.
