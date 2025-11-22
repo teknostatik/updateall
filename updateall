@@ -1,48 +1,69 @@
 #!/bin/bash
 echo "-----------------------------------"
-echo "updateall v.2.0 for Debian & Ubuntu"
+echo "updateall v.2.1 for Debian & Ubuntu"
 echo "-----------------------------------"
 
-#Run this as a normal user. Your admin password will be asked for if required.
+# Run this as a normal user. Your admin password will be asked for when required.
+# This version adds resilient error handling and conditional checks.
 
-# Standard error mitigation
+set -uo pipefail  # keep unset var + pipefail safety, custom handler replaces -e
 
-set -euo pipefail
+# Helper to run a step and continue on error
+run() {
+    local desc="$1"; shift
+    echo "==> $desc"
+    if "$@"; then
+        echo "✓ $desc succeeded"
+    else
+        local rc=$?
+        echo "⚠ $desc failed (exit $rc); continuing"
+    fi
+}
 
-# The first bit is the standard apt stuff
-
-sudo apt-get update
-sudo apt-get upgrade -y
-sudo apt-get full-upgrade -y
-sudo apt-get autoremove -y
-
-# This will get rid of any old kernels. It requires Byobu to be installed.
-
-sudo purge-old-kernels -y
-
-# Update snaps if snapd is installed
-
-if command -v snap &> /dev/null; then
-    sudo snap refresh
+# Warn if running as root
+if [ "$(id -u)" -eq 0 ]; then
+    echo "⚠ Warning: Script is running as root; recommended to run as normal user."
 fi
 
-# Update flatpaks if flatpak is installed
-# Check if we're in an SSH session and use sudo if needed
+echo "--- APT maintenance ---"
+run "APT update" sudo apt-get update
+run "APT upgrade" sudo apt-get upgrade -y
+run "APT full-upgrade" sudo apt-get full-upgrade -y
+run "APT autoremove" sudo apt-get autoremove -y
 
+# Purge old kernels if tool exists
+if command -v purge-old-kernels &> /dev/null; then
+    run "Purge old kernels" sudo purge-old-kernels -y
+else
+    echo "(skip) purge-old-kernels not installed"
+fi
+
+echo "--- Snap updates (conditional) ---"
+if command -v snap &> /dev/null; then
+    run "Snap refresh" sudo snap refresh
+else
+    echo "(skip) snapd not installed"
+fi
+
+echo "--- Flatpak updates (conditional) ---"
 if command -v flatpak &> /dev/null; then
     if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_CLIENT:-}" ]; then
-        sudo flatpak update -y
+        run "Flatpak update (SSH with sudo)" sudo flatpak update -y
     else
-        flatpak update -y
+        run "Flatpak update" flatpak update -y
     fi
+else
+    echo "(skip) flatpak not installed"
 fi
 
-# These commands are specific to any computer set up using any of my deployment scripts
-# They will start, update and then stop the containers created as part of that script
-# If you keep the containers running all the time then comment out the relevant lines
+echo "--- Multipass containers (optional) ---"
+# Uncomment if you want these managed automatically.
+# if command -v multipass &> /dev/null; then
+#     run "Multipass start ubuntu-lts" multipass start ubuntu-lts
+#     run "Multipass update in ubuntu-lts" multipass exec ubuntu-lts updateall
+#     run "Multipass stop ubuntu-lts" multipass stop ubuntu-lts
+# else
+#     echo "(skip) multipass not installed"
+# fi
 
-# multipass start ubuntu-lts
-# multipass exec ubuntu-lts updateall
-# multipass stop ubuntu-lts
-
-echo "The script has now finished running."
+echo "All steps attempted. Script finished."
