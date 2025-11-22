@@ -20,13 +20,22 @@ sudo apt-get autoremove -y
 
 sudo purge-old-kernels -y
 
-# Uncomment if you care about snaps being bang up to date
+# Update snaps if snapd is installed
 
-# sudo snap refresh
+if command -v snap &> /dev/null; then
+    sudo snap refresh
+fi
 
-# Uncomment if you are using Flatpaks and you want them to be updated by this script
+# Update flatpaks if flatpak is installed
+# Check if we're in an SSH session and use sudo if needed
 
-# flatpak update -y
+if command -v flatpak &> /dev/null; then
+    if [ -n "${SSH_CONNECTION:-}" ] || [ -n "${SSH_CLIENT:-}" ]; then
+        sudo flatpak update -y
+    else
+        flatpak update -y
+    fi
+fi
 
 # These commands are specific to any computer set up using any of my deployment scripts
 # They will start, update and then stop the containers created as part of that script
