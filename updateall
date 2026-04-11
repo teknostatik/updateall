@@ -57,6 +57,11 @@ else
 fi
 
 echo "--- Nix updates (conditional) ---"
+# Debian/Ubuntu note:
+# - Single-user Nix installs generally run these commands as the current user.
+# - Multi-user (daemon) installs may still work as user-level profile updates,
+#   but system/profile specifics can differ by setup.
+# - This script intentionally avoids NixOS-only commands (for example nixos-rebuild).
 if command -v nix &> /dev/null || command -v nix-env &> /dev/null; then
     # Refresh channels when available (legacy Nix workflow)
     if command -v nix-channel &> /dev/null; then
