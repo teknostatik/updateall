@@ -56,6 +56,30 @@ else
     echo "(skip) flatpak not installed"
 fi
 
+echo "--- Nix updates (conditional) ---"
+if command -v nix &> /dev/null || command -v nix-env &> /dev/null; then
+    # Refresh channels when available (legacy Nix workflow)
+    if command -v nix-channel &> /dev/null; then
+        run "Nix channel update" nix-channel --update
+    fi
+
+    # Upgrade package profiles; try both new and legacy CLIs for compatibility
+    if command -v nix &> /dev/null; then
+        run "Nix profile upgrade" nix profile upgrade --all
+    fi
+    if command -v nix-env &> /dev/null; then
+        run "Nix env upgrade" nix-env -u '*'
+    fi
+
+    if command -v nix-collect-garbage &> /dev/null; then
+        run "Nix garbage collection" nix-collect-garbage -d
+    else
+        echo "(skip) nix-collect-garbage not installed"
+    fi
+else
+    echo "(skip) nix not installed"
+fi
+
 echo "--- Multipass containers (optional) ---"
 # Uncomment if you want these managed automatically.
 # if command -v multipass &> /dev/null; then
