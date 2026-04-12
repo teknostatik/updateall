@@ -1,0 +1,118 @@
+#!/bin/bash
+
+echo "----------------------------------------------"
+echo "updateall v0.1 for macOS (EXPERIMENTAL)"
+echo "----------------------------------------------"
+
+# Run this as a normal user. Your admin password will be asked for when required.
+# Experimental: behavior may change as this script is tested in more environments.
+
+set -uo pipefail  # keep unset var + pipefail safety, custom handler replaces -e
+
+# Helper to run a step and continue on error
+run() {
+    local desc="$1"; shift
+    echo "==> $desc"
+    if "$@"; then
+        echo "✓ $desc succeeded"
+    else
+        local rc=$?
+        echo "⚠ $desc failed (exit $rc); continuing"
+    fi
+}
+
+# Warn if running as root
+if [ "$(id -u)" -eq 0 ]; then
+    echo "⚠ Warning: Script is running as root; recommended to run as normal user."
+fi
+
+echo "--- macOS software updates ---"
+run "macOS softwareupdate" sudo softwareupdate -i -a
+
+echo "--- Homebrew updates (conditional) ---"
+if command -v brew &> /dev/null; then
+    run "Homebrew update" brew update
+    run "Homebrew upgrade" brew upgrade
+    run "Homebrew cask upgrade" brew upgrade --cask
+    run "Homebrew autoremove" brew autoremove
+    run "Homebrew cleanup" brew cleanup
+else
+    echo "(skip) Homebrew not installed"
+fi
+
+echo "--- Mac App Store updates (conditional) ---"
+if command -v mas &> /dev/null; then
+    run "mas account check" mas account
+    run "mas upgrade" mas upgrade
+else
+    echo "(skip) mas not installed"
+fi
+
+echo "--- Nix updates (conditional) ---"
+# macOS note:
+# - Single-user Nix installs generally run these commands as the current user.
+# - Multi-user (daemon) installs may still work as user-level profile updates,
+#   but system/profile specifics can differ by setup.
+# - This script intentionally avoids NixOS-only commands (for example nixos-rebuild).
+if command -v nix &> /dev/null || command -v nix-env &> /dev/null; then
+    # Refresh channels when available (legacy Nix workflow)
+    if command -v nix-channel &> /dev/null; then
+        run "Nix channel update" nix-channel --update
+    fi
+
+    # Upgrade package profiles; try both new and legacy CLIs for compatibility
+    if command -v nix &> /dev/null; then
+        run "Nix profile upgrade" nix profile upgrade --all
+    fi
+    if command -v nix-env &> /dev/null; then
+        run "Nix env upgrade" nix-env -u '*'
+    fi
+
+    if command -v nix-collect-garbage &> /dev/null; then
+        run "Nix garbage collection" nix-collect-garbage -d
+    else
+        echo "(skip) nix-collect-garbage not installed"
+    fi
+else
+    echo "(skip) nix not installed"
+fi
+
+echo "--- Multipass containers (conditional) ---"
+if command -v multipass &> /dev/null; then
+    containers=$(multipass list --format=csv | awk -F, 'NR > 1 && NF >= 2 {
+        gsub(/^[ \t]+|[ \t]+$/, "", $1)
+        gsub(/^[ \t]+|[ \t]+$/, "", $2)
+        if ($1 != "") print $1 "|" $2
+    }')
+
+    if [ -z "$containers" ]; then
+        echo "(skip) no multipass containers found"
+    else
+        while IFS='|' read -r container state; do
+            [ -z "$container" ] && continue
+
+            if [ "$state" = "Running" ]; then
+                was_running=true
+            else
+                was_running=false
+            fi
+
+            # Start container if it was originally stopped so updates can run.
+            if [ "$was_running" = false ]; then
+                run "Multipass start $container" multipass start "$container"
+            fi
+
+            # Run the container's own updateall if available in PATH.
+            run "Multipass update in $container" multipass exec "$container" -- bash -lc 'updateall'
+
+            # Restore original state.
+            if [ "$was_running" = false ]; then
+                run "Multipass stop $container" multipass stop "$container"
+            fi
+        done <<< "$containers"
+    fi
+else
+    echo "(skip) multipass not installed"
+fi
+
+echo "All steps attempted. Script finished."
