@@ -42,8 +42,7 @@ fi
 
 echo "--- Mac App Store updates (conditional) ---"
 if command -v mas &> /dev/null; then
-    run "mas account check" mas account
-    run "mas upgrade" mas upgrade
+    run "Mac App Store upgrade" mas upgrade
 else
     echo "(skip) mas not installed"
 fi
