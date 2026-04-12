@@ -86,13 +86,39 @@ else
 fi
 
 echo "--- Multipass containers (optional) ---"
-# Uncomment if you want these managed automatically.
-# if command -v multipass &> /dev/null; then
-#     run "Multipass start ubuntu-lts" multipass start ubuntu-lts
-#     run "Multipass update in ubuntu-lts" multipass exec ubuntu-lts updateall
-#     run "Multipass stop ubuntu-lts" multipass stop ubuntu-lts
-# else
-#     echo "(skip) multipass not installed"
-# fi
+if command -v multipass &> /dev/null; then
+    # List all multipass containers
+    containers=$(multipass list --format=csv | tail -n +2 | cut -d, -f1 | tr -d ' ')
+    
+    if [ -z "$containers" ]; then
+        echo "(skip) no multipass containers found"
+    else
+        while IFS= read -r container; do
+            # Get current state (Running or Stopped)
+            state=$(multipass list --format=csv | grep "^$container," | cut -d, -f2 | tr -d ' ')
+            
+            if [ "$state" = "Running" ]; then
+                was_running=true
+            else
+                was_running=false
+            fi
+            
+            # Start container if not running
+            if [ "$was_running" = false ]; then
+                run "Multipass start $container" multipass start "$container"
+            fi
+            
+            # Run updateall in container
+            run "Multipass update in $container" multipass exec "$container" updateall
+            
+            # Restore original state
+            if [ "$was_running" = false ]; then
+                run "Multipass stop $container" multipass stop "$container"
+            fi
+        done <<< "$containers"
+    fi
+else
+    echo "(skip) multipass not installed"
+fi
 
 echo "All steps attempted. Script finished."
