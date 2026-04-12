@@ -85,7 +85,7 @@ else
     echo "(skip) nix not installed"
 fi
 
-echo "--- Multipass containers (optional) ---"
+echo "--- Multipass containers (conditional) ---"
 if command -v multipass &> /dev/null; then
     # List all multipass containers
     containers=$(multipass list --format=csv | tail -n +2 | cut -d, -f1 | tr -d ' ')
