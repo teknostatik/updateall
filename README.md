@@ -43,7 +43,8 @@ It performs:
 - `nix-collect-garbage -d`
 6. Optional Multipass updates (if installed):
 - Discovers all containers automatically
-- Runs `updateall` inside each container
+- If `updateall` exists in a container's PATH, runs it
+- Otherwise falls back to `sudo apt update && sudo apt upgrade -y`
 - Restores each container to its original state (running or stopped)
 
 ### `updateall_macos_experimental` (macOS)
@@ -71,7 +72,8 @@ It performs:
 - `nix-collect-garbage -d`
 5. Optional Multipass updates (if installed):
 - Discovers all containers automatically
-- Runs `updateall` inside each container
+- If `updateall` exists in a container's PATH, runs it
+- Otherwise falls back to `sudo apt update && sudo apt upgrade -y`
 - Restores each container to its original state (running or stopped)
 
 ## Usage
@@ -96,4 +98,4 @@ chmod +x updateall_macos_experimental
 
 - Run scripts as a normal user. `sudo` will be used when required.
 - If `nix`, `flatpak`, `snap`, `mas`, or `multipass` are not installed, those sections are skipped.
-- Multipass updates assume each container has an `updateall` command available in its PATH.
+- Multipass updates prefer each container's `updateall` command, with automatic APT fallback when unavailable.
