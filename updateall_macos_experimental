@@ -101,8 +101,12 @@ if command -v multipass &> /dev/null; then
                 run "Multipass start $container" multipass start "$container"
             fi
 
-            # Run the container's own updateall if available in PATH.
-            run "Multipass update in $container" multipass exec "$container" -- bash -lc 'updateall'
+            # Run the container's own updateall if available in PATH, else fall back to apt.
+            if multipass exec "$container" -- bash -lc 'which updateall' &>/dev/null; then
+                run "Multipass update in $container" multipass exec "$container" -- bash -lc 'updateall'
+            else
+                run "Multipass update in $container (apt fallback)" multipass exec "$container" -- bash -lc 'sudo apt update && sudo apt upgrade -y'
+            fi
 
             # Restore original state.
             if [ "$was_running" = false ]; then
